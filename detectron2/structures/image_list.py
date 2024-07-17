@@ -8,7 +8,7 @@ from torch.nn import functional as F
 from detectron2.layers.wrappers import move_device_like, shapes_to_tensor
 
 
-class ImageList(object):
+class ImageList:
     """
     Structure that holds a list of images (of possibly
     varying sizes) as a single tensor.
@@ -121,7 +121,9 @@ class ImageList(object):
             )
             batched_imgs = tensors[0].new_full(batch_shape, pad_value, device=device)
             batched_imgs = move_device_like(batched_imgs, tensors[0])
-            for img, pad_img in zip(tensors, batched_imgs):
-                pad_img[..., : img.shape[-2], : img.shape[-1]].copy_(img)
+            for i, img in enumerate(tensors):
+                # Use `batched_imgs` directly instead of `img, pad_img = zip(tensors, batched_imgs)`
+                # Tracing mode cannot capture `copy_()` of temporary locals
+                batched_imgs[i, ..., : img.shape[-2], : img.shape[-1]].copy_(img)
 
         return ImageList(batched_imgs.contiguous(), image_sizes)

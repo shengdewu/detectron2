@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 import logging
 import numpy as np
 import pickle
@@ -96,7 +98,7 @@ class Embedder(nn.Module):
         state_dict = None
         if fpath.endswith(".pkl"):
             with PathManager.open(fpath, "rb") as hFile:
-                state_dict = pickle.load(hFile, encoding="latin1")  # pyre-ignore[6]
+                state_dict = pickle.load(hFile, encoding="latin1")
         else:
             with PathManager.open(fpath, "rb") as hFile:
                 state_dict = torch.load(hFile, map_location=torch.device("cpu"))

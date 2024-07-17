@@ -195,9 +195,11 @@ def check_image_size(dataset_dict, image):
         if not image_wh == expected_wh:
             raise SizeMismatchError(
                 "Mismatched image shape{}, got {}, expect {}.".format(
-                    " for image " + dataset_dict["file_name"]
-                    if "file_name" in dataset_dict
-                    else "",
+                    (
+                        " for image " + dataset_dict["file_name"]
+                        if "file_name" in dataset_dict
+                        else ""
+                    ),
                     image_wh,
                     expected_wh,
                 )
@@ -252,6 +254,19 @@ def transform_proposals(dataset_dict, image_shape, transforms, *, proposal_topk,
         proposals.proposal_boxes = boxes[:proposal_topk]
         proposals.objectness_logits = objectness_logits[:proposal_topk]
         dataset_dict["proposals"] = proposals
+
+
+def get_bbox(annotation):
+    """
+    Get bbox from data
+    Args:
+        annotation (dict): dict of instance annotations for a single instance.
+    Returns:
+        bbox (ndarray): x1, y1, x2, y2 coordinates
+    """
+    # bbox is 1d (per-instance bounding box)
+    bbox = BoxMode.convert(annotation["bbox"], annotation["bbox_mode"], BoxMode.XYXY_ABS)
+    return bbox
 
 
 def transform_instance_annotations(
