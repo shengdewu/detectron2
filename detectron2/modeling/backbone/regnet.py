@@ -13,8 +13,10 @@ from torch import nn
 from detectron2.layers import CNNBlockBase, ShapeSpec, get_norm
 
 from .backbone import Backbone
+from .build import BACKBONE_REGISTRY
 
 __all__ = [
+    "build_regnet_backbone",
     "AnyNet",
     "RegNet",
     "ResStem",
@@ -450,3 +452,27 @@ class RegNet(AnyNet):
             norm=norm,
             out_features=out_features,
         )
+
+
+@BACKBONE_REGISTRY.register()
+def build_regnet_backbone(cfg, input_shape):
+    """
+    Create a RegNet instance from config.
+
+    Returns:
+        RegNet: a :class:`RegNet` instance.
+    """
+    param = dict(
+        stem_class=ResStem if cfg.MODEL.REGNETS.STEM == 'ResStem' else SimpleStem,
+        stem_width=cfg.MODEL.REGNETS.STEM_WIDTH,
+        depth=cfg.MODEL.REGNETS.DEPTH,
+        w_a=cfg.MODEL.REGNETS.W_A,
+        w_0=cfg.MODEL.REGNETS.W_0,
+        w_m=cfg.MODEL.REGNETS.W_M,
+        group_width=cfg.MODEL.REGNETS.GROUP_WIDTH,
+        norm=cfg.MODEL.REGNETS.NORM,
+        out_features=cfg.MODEL.REGNETS.OUT_FEATURES,
+        block_class=ResBottleneckBlock,
+    )
+
+    return RegNet(**param)
